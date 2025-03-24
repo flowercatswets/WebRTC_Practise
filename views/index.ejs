@@ -2,6 +2,7 @@
 <html lang="en">
 	<head>
 		<title>O'Reilly Introduction to WebRTC</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
 		<video autoplay></video>
@@ -27,7 +28,8 @@
 				console.log("Success! We have a stream");
 				//eprecated API
 				//videoArea.src=window.URL.createObjectURL(stream);
-				videoArea.srcObject = stream;	
+				videoArea.srcObject = stream;
+				videoArea.className="grayscale_filter";	
 				videoArea.play();
 			}
 
