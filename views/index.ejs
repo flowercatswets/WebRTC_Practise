@@ -5,13 +5,18 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
-	
+		<div>
+			Video:<select id="camera"></select>
+		</div>
 		<video autoplay></video>
 		<script>
 			
 			var videoArea=document.querySelector("video");
-			//var videSelect=document.querySelector('#camera');
-			//MediaStreamTrack.getSource=(getCameras);
+			var videoSelect=document.querySelector('#camera');
+			//MediaStreamTrack.getSources(getCameras);
+			getameras();
+			
+			videoSelect.onChange=startStream;
 			startStream();
 
 			function startStream()
@@ -35,12 +40,38 @@
 			}
 			
 
-			function getCameras(sourceInfo)
+			/* function getCameras(sourceInfos)
 			{
 				for (var i=0;i!=sourceInfo.length;i++)
 				{
-
+					var souceInfo = sourceInfos[i];
+					var option = document.createElement('option');
+					option.value=souceInfo.id;
+					if(souceInfo.kind=='video'){
+						option.text=souceInfo.label||'camera '+(videoSelect.lengt1);
+						videoSelect.appendChild(option);
+					}
 				}
+			} */
+
+			function getameras()
+			{
+				var option = document.createElement('option');
+				navigator.mediaDevices.enumerateDevices()
+				.then(devices => {
+					devices.forEach(device => {
+					if (device.kind === 'videoinput') {
+						console.log('Video device: ', device);
+						option.text=device.label||'camera '+(videoSelect.lengt1);
+						videoSelect.appendChild(option);
+					} else if (device.kind === 'audioinput') {
+						console.log('Audio device: ', device);
+					}
+					});
+				})
+				.catch(err => {
+					console.error('Error enumerating devices: ', err);
+				});
 			}
 
 			function onSuccess(stream){
