@@ -8,13 +8,76 @@
 		<div>
 			Video:<select id="camera"></select>
 		</div>
-		<video autoplay></video>
+		<video id="videoTag" autoplay></video>
+		<p><button id="takeProfilePicture" type="button" autofocus="true">Create Profile Picture</button></p>
+		<canvas id="profilePicCanvas" style="display:none"></canvas>
+		<div>
+			<img id="profilePictureOutput">
+		</div>
 		<script>
 			
 			var videoArea=document.querySelector("video");
 			var videoSelect=document.querySelector('#camera');
+
+			var profilePicCanvas=document.querySelector("#profilePicCanvas");
+			var profilePictureOutput=document.querySelector("#profilePictureOutput");
+			var takePicButton=document.querySelector("#takeProfilePicture");
+			var videoTag=document.querySelector("#videoTag");
+
+			var width=240; //Desired width of the profile picture
+			var height=0; //Calulated later base on image ratio
+			var streaming=false; //Used to determine when the video has loaded
+
+			takePicButton.addEventListener('click',function(ev){
+				takeProfilePic();
+				ev.preventDefault();
+			},false);
+
+			videoTag.addEventListener('canplay',function(ev){
+				console.log('video can play');
+				if (!streaming)
+				{
+					height=videoTag.videoHeight/(videoTag.videoWidth/width);
+					//height=videoTag.videoArea.Width/(videoTag.videoArea.Width/Width);
+					//firefox currently has a bug where the height can't be read
+					//the video , so we will make assumptions if this happens.
+
+					if(isNaN(height))
+					{
+						height=width/(4/3);
+					}
+
+					videoTag.setAttribute('width',width);
+					videoTage.setAttribute('height,height');
+					profilePicCanvas.setAttribute('width',width);
+					profilePicCanvas.setAttribute('height,height');
+					streaming=true;
+				}
+			},false); 
+
+
+			function takeProfilePic(){
+				var context=profilePicCanvas.getContext('2d');
+				if(window && height)
+				{
+					profilePicCanvas.width=width;
+					profilePicCanvas.height=height;
+					context.drawImage(videoTag,0,0,width,height);
+
+					var data=profilePicCanvas.toDataURL('image/png');
+					profilePictureOutput.setAttribute('src',data);
+				}
+			}
+
 			//MediaStreamTrack.getSources(getCameras);
-			getameras();
+			if (typeof MediaStreamTrack=='undefine' || typeof MediaStreamTrack.enumerateDevices=='undefine'){
+				document.querySelector('#camera').style.visibility="hidden";
+			}
+			else
+			{
+				getameras();
+			}
+		
 			
 			videoSelect.onChange=startStream;
 			startStream();
@@ -25,15 +88,21 @@
 				/*var constraints={
 					audio:true,
 					video:true};*/
+				var videoSource=videoSelect.value;
 				var constraints={
 					audio:true,
 					video:{
 						mandatory:{
-							minWidth:640,
-							maxWidth:640,
+							//minWidth:640,
+							//maxWidth:640,
+							minWidth:240,
+							maxWidth:240,
 							minHeight:360,
 							maxHeight:480
-						}
+						},
+						option:[{
+							souceId:videoSource
+						}]
 					}
 				};	
 				navigator.getUserMedia(constraints,onSuccess,onError);
@@ -62,7 +131,7 @@
 					devices.forEach(device => {
 					if (device.kind === 'videoinput') {
 						console.log('Video device: ', device);
-						option.text=device.label||'camera '+(videoSelect.lengt1);
+						option.text=device.label||'camera '+(videoSelect.length);
 						videoSelect.appendChild(option);
 					} else if (device.kind === 'audioinput') {
 						console.log('Audio device: ', device);
