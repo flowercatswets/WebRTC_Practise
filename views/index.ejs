@@ -8,6 +8,9 @@
 		<div>
 			Video:<select id="camera"></select>
 		</div>
+		<div>
+			Audo:<select id="audio"></select>
+		</div>
 		<video id="videoTag"></video>
 		<p><button id="takeProfilePicture" type="button" autofocus="true">Create Profile Picture</button></p>
 		<canvas id="profilePicCanvas" style="display:none"></canvas>
@@ -18,7 +21,7 @@
 			
 			var videoArea=document.querySelector("video");
 			var videoSelect=document.querySelector('#camera');
-
+			var audioSelect=document.querySelector('#audio');
 			var profilePicCanvas=document.querySelector("#profilePicCanvas");
 			var profilePictureOutput=document.querySelector("#profilePictureOutput");
 			var takePicButton=document.querySelector("#takeProfilePicture");
@@ -81,7 +84,13 @@
 		
 			
 			videoSelect.onchange=function(){
-				console.log('onchange '+videoSelect.value);
+				console.log('Vido onchange '+videoSelect.value);
+				startStream();
+			}
+
+
+			audioSelect.onchange=function(){
+				console.log('Audio onchange '+audioSelect.value);
 				startStream();
 			}
 
@@ -92,10 +101,13 @@
 				
 				//navigator.getUserMedia=navigator.getUserMedia||navigator.webkitGetUseerMedia||navigator.mozGetUserMedia;
 				
-				var videoSource=videoSelect.value;
+				let videoSource=videoSelect.value;
+				let audioSource=audioSelect.value;
 				console.log('videoSelect.value: '+videoSelect.value);
 				var constraints={
-					audio:true,
+					audio:{
+						deviceId: audioSource ? { exact: audioSource } : undefined
+					},
 					video:{
 						/*mandatory:{
 							minWidth:240,
@@ -121,21 +133,7 @@
 				.then(onSuccess)
 				.catch(onError)*/
 			}
-			
-
-			/* function getCameras(sourceInfos)
-			{
-				for (var i=0;i!=sourceInfo.length;i++)
-				{
-					var souceInfo = sourceInfos[i];
-					var option = document.createElement('option');
-					option.value=souceInfo.id;
-					if(souceInfo.kind=='video'){
-						option.text=souceInfo.label||'camera '+(videoSelect.lengt1);
-						videoSelect.appendChild(option);
-					}
-				}
-			} */
+		
 
 			function getCameras()
 			{
@@ -143,14 +141,17 @@
 				navigator.mediaDevices.enumerateDevices()
 				.then(devices => {
 					devices.forEach(device => {
+					let option = document.createElement('option');
 					if (device.kind === 'videoinput') {
-						var option = document.createElement('option');
 						console.log('Video device: ', device);
 						option.text=device.label||'camera '+(videoSelect.length);
 						option.value=device.deviceId;
 						videoSelect.appendChild(option);
 					} else if (device.kind === 'audioinput') {
 						console.log('Audio device: ', device);
+						option.text=device.label||'camera '+(audioSelect.length);
+						option.value=device.deviceId;
+						audioSelect.appendChild(option);
 					}
 					});
 					console.log("get Camera List Done");
