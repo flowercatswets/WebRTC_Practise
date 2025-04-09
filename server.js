@@ -8,5 +8,9 @@ app.get('/',function(req,res){
 	res.render('index.ejs');
 
 });
+app.get('/demo',function(req,res){
+	res.render('demo.ejs');
+
+});
 
 app.listen(3000);

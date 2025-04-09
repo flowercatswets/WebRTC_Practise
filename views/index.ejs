@@ -2,13 +2,13 @@
 <html lang="en">
 	<head>
 		<title>O'Reilly Introduction to WebRTC</title>
-		<link rel="stylesheet" type="text/css" href="style.css">
+		<link rel="stylesheet" type="text/css" href="css/style.css">
 	</head>
 	<body>
 		<div>
 			Video:<select id="camera"></select>
 		</div>
-		<video id="videoTag" autoplay></video>
+		<video id="videoTag"></video>
 		<p><button id="takeProfilePicture" type="button" autofocus="true">Create Profile Picture</button></p>
 		<canvas id="profilePicCanvas" style="display:none"></canvas>
 		<div>
@@ -27,6 +27,7 @@
 			var width=240; //Desired width of the profile picture
 			var height=0; //Calulated later base on image ratio
 			var streaming=false; //Used to determine when the video has loaded
+			var localStream;
 
 			takePicButton.addEventListener('click',function(ev){
 				takeProfilePic();
@@ -48,9 +49,9 @@
 					}
 
 					videoTag.setAttribute('width',width);
-					videoTage.setAttribute('height,height');
+					videoTag.setAttribute('height',height);
 					profilePicCanvas.setAttribute('width',width);
-					profilePicCanvas.setAttribute('height,height');
+					profilePicCanvas.setAttribute('height',height);
 					streaming=true;
 				}
 			},false); 
@@ -75,37 +76,50 @@
 			}
 			else
 			{
-				getameras();
+				getCameras();
 			}
 		
 			
-			videoSelect.onChange=startStream;
-			startStream();
+			videoSelect.onchange=function(){
+				console.log('onchange '+videoSelect.value);
+				startStream();
+			}
 
-			function startStream()
+			//startStream();
+
+			async function startStream()
 			{
-				navigator.getUserMedia=navigator.getUserMedia||navigator.webkitGetUseerMedia||navigator.mozGetUserMedia;
-				/*var constraints={
-					audio:true,
-					video:true};*/
+				
+				//navigator.getUserMedia=navigator.getUserMedia||navigator.webkitGetUseerMedia||navigator.mozGetUserMedia;
+				
 				var videoSource=videoSelect.value;
+				console.log('videoSelect.value: '+videoSelect.value);
 				var constraints={
 					audio:true,
 					video:{
-						mandatory:{
-							//minWidth:640,
-							//maxWidth:640,
+						/*mandatory:{
 							minWidth:240,
 							maxWidth:240,
 							minHeight:360,
 							maxHeight:480
 						},
 						option:[{
-							souceId:videoSource
-						}]
+							souceId:videoSource,
+							
+						}],*/
+						deviceId: videoSource ? { exact: videoSource } : undefined
 					}
+					
 				};	
-				navigator.getUserMedia(constraints,onSuccess,onError);
+
+
+				await navigator.getUserMedia(constraints,onSuccess,onError);
+				//await navigator.getUserMedia(constraints,onSuccess,onError);
+				//await navigator.mediaDevices.getUserMedia(constraints,onSuccess,onError);
+				/*await navigator.mediaDevices
+				.getUserMedia(constraints)
+				.then(onSuccess)
+				.catch(onError)*/
 			}
 			
 
@@ -123,20 +137,24 @@
 				}
 			} */
 
-			function getameras()
+			function getCameras()
 			{
-				var option = document.createElement('option');
+				//var isFirstCamer=false;
 				navigator.mediaDevices.enumerateDevices()
 				.then(devices => {
 					devices.forEach(device => {
 					if (device.kind === 'videoinput') {
+						var option = document.createElement('option');
 						console.log('Video device: ', device);
 						option.text=device.label||'camera '+(videoSelect.length);
+						option.value=device.deviceId;
 						videoSelect.appendChild(option);
 					} else if (device.kind === 'audioinput') {
 						console.log('Audio device: ', device);
 					}
 					});
+					console.log("get Camera List Done");
+					startStream();
 				})
 				.catch(err => {
 					console.error('Error enumerating devices: ', err);
@@ -144,17 +162,76 @@
 			}
 
 			function onSuccess(stream){
+				
+				//stop old stream
+				StopVideo();
+				//stream.getTracks().forEach(function (track) { track.stop() })
+				//start new stream
+				localStream=stream;
 				console.log("Success! We have a stream");
 				//eprecated API
 				//videoArea.src=window.URL.createObjectURL(stream);
+				videoArea.srcObject=null;
 				videoArea.srcObject = stream;
-				videoArea.className="grayscale_filter";	
+				//videoArea.className="grayscale_filter";	
 				videoArea.play();
 			}
 
 			function onError(stream){
 				constraints.log("Error with getUserMedia: ",error);
 			}
+
+			function StopVideo()
+			{
+				const video = document.querySelector('video');
+
+				// A video's MediaStream object is available through its srcObject attribute
+				const mediaStream = video.srcObject;
+				if (mediaStream)
+				{
+					// Through the MediaStream, you can get the MediaStreamTracks with getTracks():
+					const tracks = mediaStream.getTracks();
+					//stop all like so:
+					tracks.forEach(track => track.stop())
+				}
+
+				// navigator.mediaDevices.getUserMedia({video: true, audio: true})
+				// .then(mediaStream => {
+				// 	const stream = mediaStream;
+				// 	const tracks = stream.getTracks();
+
+				// 	//tracks[0].stop;
+				// 	tracks.forEach(track => track.stop())
+				// })
+				
+			}
+
+			/* // stop both mic and camera
+			function stopBothVideoAndAudio(stream) {
+				stream.getTracks().forEach((track) => {
+					if (track.readyState == 'live') {
+						track.stop();
+					}
+				});
+			}
+
+			// stop only camera
+			function stopVideoOnly(stream) {
+				stream.getTracks().forEach((track) => {
+					if (track.readyState == 'live' && track.kind === 'video') {
+						track.stop();
+					}
+				});
+			}
+
+			// stop only mic
+			function stopAudioOnly(stream) {
+				stream.getTracks().forEach((track) => {
+					if (track.readyState == 'live' && track.kind === 'audio') {
+						track.stop();
+					}
+				});
+			} */
 
 			
 		</script>
