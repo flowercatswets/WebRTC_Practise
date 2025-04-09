@@ -31,12 +31,13 @@
 			var height=0; //Calulated later base on image ratio
 			var streaming=false; //Used to determine when the video has loaded
 			var localStream;
-
+			
+			//Take Picture Button Handler
 			takePicButton.addEventListener('click',function(ev){
 				takeProfilePic();
 				ev.preventDefault();
 			},false);
-
+			//Video Can Play Event Handler
 			videoTag.addEventListener('canplay',function(ev){
 				console.log('video can play');
 				if (!streaming)
@@ -59,7 +60,7 @@
 				}
 			},false); 
 
-
+			//Take Picture Function
 			function takeProfilePic(){
 				var context=profilePicCanvas.getContext('2d');
 				if(window && height)
@@ -73,7 +74,7 @@
 				}
 			}
 
-			//MediaStreamTrack.getSources(getCameras);
+			//if not any 
 			if (typeof MediaStreamTrack=='undefine' || typeof MediaStreamTrack.enumerateDevices=='undefine'){
 				document.querySelector('#camera').style.visibility="hidden";
 			}
@@ -82,20 +83,19 @@
 				getCameras();
 			}
 		
-			
+			//Video Device Change Event
 			videoSelect.onchange=function(){
 				console.log('Vido onchange '+videoSelect.value);
 				startStream();
 			}
 
-
+			//Audio Device Select Change Event
 			audioSelect.onchange=function(){
 				console.log('Audio onchange '+audioSelect.value);
 				startStream();
 			}
 
-			//startStream();
-
+			//Start Stream
 			async function startStream()
 			{
 				
@@ -126,15 +126,9 @@
 
 
 				await navigator.getUserMedia(constraints,onSuccess,onError);
-				//await navigator.getUserMedia(constraints,onSuccess,onError);
-				//await navigator.mediaDevices.getUserMedia(constraints,onSuccess,onError);
-				/*await navigator.mediaDevices
-				.getUserMedia(constraints)
-				.then(onSuccess)
-				.catch(onError)*/
 			}
 		
-
+			//Get Camera and Audio Device List
 			function getCameras()
 			{
 				//var isFirstCamer=false;
@@ -161,7 +155,7 @@
 					console.error('Error enumerating devices: ', err);
 				});
 			}
-
+			//Create Media Stream Success Handler
 			function onSuccess(stream){
 				
 				//stop old stream
@@ -177,11 +171,11 @@
 				//videoArea.className="grayscale_filter";	
 				videoArea.play();
 			}
-
+			//Create Video Stream Error Handler
 			function onError(stream){
 				constraints.log("Error with getUserMedia: ",error);
 			}
-
+			//Stop Video and Audio
 			function StopVideo()
 			{
 				const video = document.querySelector('video');
@@ -195,46 +189,7 @@
 					//stop all like so:
 					tracks.forEach(track => track.stop())
 				}
-
-				// navigator.mediaDevices.getUserMedia({video: true, audio: true})
-				// .then(mediaStream => {
-				// 	const stream = mediaStream;
-				// 	const tracks = stream.getTracks();
-
-				// 	//tracks[0].stop;
-				// 	tracks.forEach(track => track.stop())
-				// })
-				
 			}
-
-			/* // stop both mic and camera
-			function stopBothVideoAndAudio(stream) {
-				stream.getTracks().forEach((track) => {
-					if (track.readyState == 'live') {
-						track.stop();
-					}
-				});
-			}
-
-			// stop only camera
-			function stopVideoOnly(stream) {
-				stream.getTracks().forEach((track) => {
-					if (track.readyState == 'live' && track.kind === 'video') {
-						track.stop();
-					}
-				});
-			}
-
-			// stop only mic
-			function stopAudioOnly(stream) {
-				stream.getTracks().forEach((track) => {
-					if (track.readyState == 'live' && track.kind === 'audio') {
-						track.stop();
-					}
-				});
-			} */
-
-			
 		</script>
 	</body>
 </html>
