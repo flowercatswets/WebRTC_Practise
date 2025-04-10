@@ -3,6 +3,10 @@
 	<head>
 		<title>O'Reilly Introduction to WebRTC</title>
 		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+		<script>
+			var socket = io();
+		</script>
 	</head>
 	<body>
 		<div>
@@ -12,6 +16,12 @@
 			Audo:<select id="audio"></select>
 		</div>
 		<video id="videoTag"></video>
+		<div>
+			<label>Your Name</label><input id="myName" type="text" />
+			<label>Message</label><input id="myMessage" type="text" />
+			<input id="sendMessage" type="submit" />
+			<div id="chatArea">Message Output:</br></div>
+		</div>
 		<p><button id="takeProfilePicture" type="button" autofocus="true">Create Profile Picture</button></p>
 		<canvas id="profilePicCanvas" style="display:none"></canvas>
 		<div>
@@ -26,6 +36,12 @@
 			var profilePictureOutput=document.querySelector("#profilePictureOutput");
 			var takePicButton=document.querySelector("#takeProfilePicture");
 			var videoTag=document.querySelector("#videoTag");
+
+			var myName=document.querySelector("#myName");
+			var myMessage=document.querySelector("#myMessage");
+			var sendMessage=document.querySelector("#sendMessage");
+			var chatArea=document.querySelector("#chatArea");
+			var ROOM="chat";
 
 			var width=240; //Desired width of the profile picture
 			var height=0; //Calulated later base on image ratio
@@ -127,6 +143,20 @@
 
 				await navigator.getUserMedia(constraints,onSuccess,onError);
 			}
+
+			function ConnectSocketIO()
+			{
+				
+				socket.emit('ready',ROOM);
+				socket.on('announce',function(data){
+					displayMessage(data.message);
+				});
+			}
+
+			function displayMessage(message)
+			{
+				chatArea.innerHTML=chatArea.innerHTML+"</br>"+message;
+			}
 		
 			//Get Camera and Audio Device List
 			function getCameras()
@@ -150,6 +180,7 @@
 					});
 					console.log("get Camera List Done");
 					startStream();
+					ConnectSocketIO();
 				})
 				.catch(err => {
 					console.error('Error enumerating devices: ', err);

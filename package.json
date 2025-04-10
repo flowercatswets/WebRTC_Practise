@@ -1,9 +1,10 @@
 {
-	"name":"intro-webrtc",
-	"version":"0.0.1",
-	"private":true,
-	"dependencies":{
-		"express":"4.x",
-		"ejs":"2.x"
+	"name": "intro-webrtc",
+	"version": "0.0.1",
+	"private": true,
+	"dependencies": {
+		"ejs": "^3.1.10",
+		"express": "4.x",
+		"socket.io": "^4.8.1"
 	}
 }
